@@ -1,0 +1,108 @@
+<h2>Productos en tiempo real</h2>
+<h3>Crear Producto</h3>
+<form id="myForm">
+    Nombre: <input type="text" name="title">
+    <br>
+    Descripcion: <input type="text" name="description">
+    <br>
+    Precio: <input type="number" name="price">
+    <br>
+    Imagen: <input type="text" name="thumbnail">
+    <br>
+    Codigo: <input type="text" name="code">
+    <br>
+    Stock: <input type="text" name="stock">
+    <br>
+    <button type="submit">Enviar</button>
+</form>
+<h3>Eliminar producto segun ID</h3>
+<form id="myForm2">
+    ID: <input type="text" name="id1">
+ 
+    <button type="submit">Enviar</button>
+</form>
+
+<table border="1"> 
+    <thead>
+        <tr>
+            <td>ID</td>
+            <td>Nombre</td>
+            <td>Precio</td>
+        </tr>
+    </thead>
+    <tbody id="tbody">
+        {{#each productos}}
+        <tr>
+            <td>{{this.id}}</td>
+            <td>{{this.title}}</td>
+            <td>{{this.price}}</td>
+        </tr>
+        {{/each}}
+    </tbody>
+</table>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    const socket = io()
+    document.getElementById("myForm").onsubmit = e => {
+        e.preventDefault()
+
+        const name = document.querySelector("input[name=title]").value
+        const price =parseInt( document.querySelector("input[name=price]").value)
+        const description = document.querySelector("input[name=description]").value
+        const thumbnail  = document.querySelector("input[name=thumbnail]").value
+        const code = document.querySelector("input[name=code]").value
+        const stock = document.querySelector("input[name=stock]").value
+
+        const product = {name,price,description,thumbnail,code,stock}
+        socket.emit("new-product", product)
+
+        socket.on("recargar-tabla", products1=> {
+            console.log(products1)
+            const tbody = document.getElementById("tbody")
+
+            let html = "";
+            products1.forEach(prod => {
+                html +=`<tr>
+                <td>${prod.id}</td>
+                <td>${prod.title}</td>
+                <td>${prod.price}</td>
+                </tr>
+                `
+            })
+
+            tbody.innerHTML = html
+        })
+
+
+    }
+    
+
+        document.getElementById("myForm2").onsubmit = e => {
+        e.preventDefault()
+
+        const id2 = document.querySelector("input[name=id1]").value
+    
+        socket.emit("eliminar-producto", id2)
+
+        socket.on("recargar-tabla", products1=> {
+            console.log(products1)
+            const tbody = document.getElementById("tbody")
+
+            let html = "";
+            products1.forEach(prod => {
+                html +=`<tr>
+                <td>${prod.id}</td>
+                <td>${prod.title}</td>
+                <td>${prod.price}</td>
+                </tr>
+                `
+            })
+
+            tbody.innerHTML = html
+        })
+
+
+    }
+
+    
+</script>
